@@ -113,13 +113,14 @@ angular.module('abortionsCrimeApp',[]).controller('abortionsCrimeController', fu
 
                         if(refValue)
                         {
-                            var absChange = refValue - currValue;
+                            var absChange = currValue - refValue;
 
                             var relChange = Math.round(100 * absChange * 2 / (refValue + currValue));
 
                             var absKey = 'Absolute Change in ' + crimeType;
                             var relKey = 'Relative Change in ' + crimeType;
 
+                            $scope.crimesByState[d.State][d.Year]['Reference Year'] = refYear;
                             $scope.crimesByState[d.State][d.Year][absKey] = Math.round(absChange);
                             $scope.crimesByState[d.State][d.Year][relKey] = relChange;
                         }

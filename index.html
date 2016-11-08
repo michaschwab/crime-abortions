@@ -138,25 +138,28 @@
                     <dd></dd>
                 </dl>
             </div>
-            <div class="col-md-4"></div>
+
             <div class="col-md-2">
-                <h3>{{currentCrimeType}} in {{currentYear}}</h3>
+                <h3>{{currentCrimeType}} in {{currentCrimeYear}}</h3>
                 <dl>
                     <dt>Number</dt>
                     <dd>{{crimesByState[hoveredState][currentCrimeYear][currentCrimeType]}}
-                        </dd>
+                        (vs. {{crimesByState[hoveredState][crimesByState[hoveredState][currentCrimeYear]['Reference Year']][currentCrimeType]}}
+                        in
+                        {{crimesByState[hoveredState][currentCrimeYear]['Reference Year']}})</dd>
 
                     <dt>Absolute Change</dt>
-                    <dd>{{crimesByState[hoveredState][currentCrimeYear]['Absolute Change in '+currentCrimeType]}}</dd>
+                    <dd>{{crimesByState[hoveredState][currentCrimeYear]['Absolute Change in '+currentCrimeType]>0?'+':''}}{{crimesByState[hoveredState][currentCrimeYear]['Absolute Change in '+currentCrimeType]}}</dd>
 
                     <dt>Relative Change</dt>
-                    <dd>{{crimesByState[hoveredState][currentCrimeYear]['Relative Change in '+currentCrimeType]}} %</dd>
+                    <dd>{{crimesByState[hoveredState][currentCrimeYear]['Relative Change in '+currentCrimeType]>0?'+':''}}{{crimesByState[hoveredState][currentCrimeYear]['Relative Change in '+currentCrimeType]}} %</dd>
 
                     <dt></dt>
                     <dd></dd>
                 </dl>
 
             </div>
+            <div class="col-md-4"></div>
             <div class="col-md-4"></div>
         </div>
 
