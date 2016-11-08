@@ -11,6 +11,7 @@ angular.module('abortionsCrimeApp',[]).controller('abortionsCrimeController', fu
 {
     $scope.currentYear = "1985";
     $scope.currentAbortionView = "Relative Change";
+    $scope.currentCrimeView = "Relative Change";
     $scope.currentDelayYears = 18;
     $scope.currentCrimeYear = ""; // Calculated roughly as currentYear + currentDelayYears, considering available data.
     $scope.currentCrimeType = "Violent Crime rate";
@@ -43,11 +44,12 @@ angular.module('abortionsCrimeApp',[]).controller('abortionsCrimeController', fu
 
     $scope.setupCharts = function(callback)
     {
-        $scope.colorAbortionsLinear = d3.scaleLinear().range(["#f5f5f5", "steelblue"]);
+        $scope.colorAbortionsLinear = d3.scaleLinear().range(["#f5f5f5", "#552d84"]);
         $scope.colorAbortionsDiverging = d3.scaleSequential(d3.interpolatePuOr);
             //.range(["darkred", "#f5f5f5", "steelblue"]);
-        $scope.colorCrime = d3.scaleLinear()
+        $scope.colorCrimeLinear = d3.scaleLinear()
             .range(["#f5f5f5", "darkred"]);
+        $scope.colorCrimeDiverging = d3.scaleSequential(d3.interpolateRdYlBu);
 
         var projection = d3.geoAlbersUsa()
             .translate([$scope.visWidth/2, $scope.visHeight/2])    // translate to center of screen
@@ -97,7 +99,34 @@ angular.module('abortionsCrimeApp',[]).controller('abortionsCrimeController', fu
                 if(!$scope.crimesByState[d.State])
                     $scope.crimesByState[d.State] = {};
 
+
+                var refYear = d.Year < 1965 ? 1960 : d.Year - 5;
+                //console.log(refYear);
                 $scope.crimesByState[d.State][d.Year] = d;
+
+                if($scope.crimesByState[d.State][refYear])
+                {
+                    for(var crimeType in d)
+                    {
+                        var currValue = +d[crimeType];
+                        var refValue = +$scope.crimesByState[d.State][refYear][crimeType];
+
+                        if(refValue)
+                        {
+                            var absChange = refValue - currValue;
+
+                            var relChange = Math.round(100 * absChange * 2 / (refValue + currValue));
+
+                            var absKey = 'Absolute Change in ' + crimeType;
+                            var relKey = 'Relative Change in ' + crimeType;
+
+                            $scope.crimesByState[d.State][refYear][absKey] = Math.round(absChange);
+                            $scope.crimesByState[d.State][refYear][relKey] = relChange;
+                        }
+
+                    }
+                }
+                //console.log($scope.crimesByState[d.State]);
             })
             .await(function(error, json)
             {
@@ -137,7 +166,7 @@ angular.module('abortionsCrimeApp',[]).controller('abortionsCrimeController', fu
                     return '#cccccc';
                 }
                 //console.log(thisStatesAbortions);
-                console.log(thisStatesAbortions[$scope.currentYear][$scope.currentAbortionView]);
+                //console.log(thisStatesAbortions[$scope.currentYear][$scope.currentAbortionView]);
 
                 //return $scope.colorAbortions(-200);
                 return $scope.colorAbortions(thisStatesAbortions[$scope.currentYear][$scope.currentAbortionView]);
@@ -146,8 +175,11 @@ angular.module('abortionsCrimeApp',[]).controller('abortionsCrimeController', fu
             .attr("d", $scope.path)
             .on('mouseover', function(d)
             {
-                $scope.hoveredState = d.properties.name;
-                $scope.updateActive();
+                $scope.$apply(function()
+                {
+                    $scope.hoveredState = d.properties.name;
+                    $scope.updateActive();
+                });
             })
             .append("title")
             .text(function(d)
@@ -197,14 +229,18 @@ angular.module('abortionsCrimeApp',[]).controller('abortionsCrimeController', fu
                     return '#cccccc';
                 }
 
-                return $scope.colorCrime(thisStatesCrimes[$scope.currentCrimeYear][$scope.currentCrimeType]);
+                var crimeType = $scope.getFullCurrentCrimeType();
+                return $scope.colorCrime(thisStatesCrimes[$scope.currentCrimeYear][crimeType]);
                 /*color(d.rate = unemployment.get(d.id));*/
             })
             .attr("d", $scope.path)
             .on('mouseover', function(d)
             {
-                $scope.hoveredState = d.properties.name;
-                $scope.updateActive();
+                $scope.$apply(function()
+                {
+                    $scope.hoveredState = d.properties.name;
+                    $scope.updateActive();
+                });
             })
             .append("title")
             .text(function(d)
@@ -215,7 +251,11 @@ angular.module('abortionsCrimeApp',[]).controller('abortionsCrimeController', fu
                 if(thisStatesCrimes)
                 {
                     if(thisStatesCrimes[$scope.currentCrimeYear])
-                        label += ': ' + thisStatesCrimes[$scope.currentCrimeYear][$scope.currentCrimeType] + ' crimes';
+                    {
+                        var crimeType = $scope.getFullCurrentCrimeType();
+                        var number = thisStatesCrimes[$scope.currentCrimeYear][crimeType];
+                        label += ': ' + number + ' crimes';
+                    }
                     else
                         console.log('no crimes of type ', $scope.currentCrimeType, 'found in ', $scope.currentCrimeYear, ' in ', d.properties.name);
                 }
@@ -244,9 +284,18 @@ angular.module('abortionsCrimeApp',[]).controller('abortionsCrimeController', fu
         }
         return best;
     }
+    $scope.getFullCurrentCrimeType = function()
+    {
+        var key = $scope.currentCrimeView == 'Number' ? '' : $scope.currentCrimeView + ' in ';
+        key += $scope.currentCrimeType;
+        return key;
+    };
 
     $scope.setColorScales = function()
     {
+        var abortionsDiverging = false;
+        $scope.currentCrimeYear = getClosestCrimeYear();
+
         if($scope.currentAbortionView == 'Number')
         {
             $scope.colorAbortions = $scope.colorAbortionsLinear;
@@ -254,9 +303,23 @@ angular.module('abortionsCrimeApp',[]).controller('abortionsCrimeController', fu
         else
         {
             $scope.colorAbortions = $scope.colorAbortionsDiverging;
+            abortionsDiverging = true;
         }
+
+        var crimeDiverging = false;
+        if($scope.currentCrimeView == 'Number')
+        {
+            $scope.colorCrime = $scope.colorCrimeLinear;
+        }
+        else
+        {
+            crimeDiverging = true;
+            $scope.colorCrime = $scope.colorCrimeDiverging;
+        }
+
         var lowestAbortions = 10000;
         var highestAbortions = 0;
+        var lowestCrimes = 10000;
         var highestCrimes = 1;
 
         for(var state in $scope.abortionsByState)
@@ -275,23 +338,29 @@ angular.module('abortionsCrimeApp',[]).controller('abortionsCrimeController', fu
         //console.log($scope.currentCrimeType);
         for(state in $scope.crimesByState)
         {
-            for(year in $scope.crimesByState[state])
+            //for(year in $scope.crimesByState[state])
             {
-                var crimes = +$scope.crimesByState[state][year][$scope.currentCrimeType];
-                /*if(state == "Texas")
+                var year = $scope.currentCrimeYear;
+                var crimeType = $scope.getFullCurrentCrimeType();
+                //console.log(year);
+                if($scope.crimesByState[state][year])
                 {
-                    console.log(year, $scope.crimesByState[state][year][$scope.currentCrimeType], crimes, highestCrimes, $scope.crimesByState[state][year][$scope.currentCrimeType] > highestCrimes);
-                }*/
+                    var crimes = +$scope.crimesByState[state][year][crimeType];
+                    //console.log(crimes);
 
-                if(crimes > highestCrimes)
-                    highestCrimes = crimes;
+                    if(crimes > highestCrimes)
+                        highestCrimes = crimes;
+                    if(crimes < lowestCrimes)
+                        lowestCrimes = crimes;
+                }
+
             }
         }
         //console.log(highestAbortions);
         //console.log(highestCrimes);
         //highestCrimes = 200000;
         var abortionsDomain;
-        if(lowestAbortions<0)
+        if(abortionsDiverging)
         {
             // here, i want to make sure that the domain is symmetric around 0 so 0 gets the neutral color.
             var higherAbs = highestAbortions;
@@ -303,11 +372,27 @@ angular.module('abortionsCrimeApp',[]).controller('abortionsCrimeController', fu
         {
             abortionsDomain = [lowestAbortions, highestAbortions];
         }
-        console.log(abortionsDomain);
-        $scope.colorAbortions.domain(abortionsDomain);
-        $scope.colorCrime.domain([0, highestCrimes]);
 
-        $scope.currentCrimeYear = getClosestCrimeYear();
+        var crimeDomain;
+        if(crimeDiverging)
+        {
+            // here, i want to make sure that the domain is symmetric around 0 so 0 gets the neutral color.
+            higherAbs = highestCrimes;
+            if(Math.abs(lowestCrimes) > highestCrimes) higherAbs = Math.abs(lowestCrimes);
+
+            crimeDomain = [higherAbs * -1, higherAbs];
+        }
+        else
+        {
+            crimeDomain = [lowestCrimes, highestCrimes];
+        }
+
+        //console.log(abortionsDomain);
+        //console.log(crimeDomain);
+        $scope.colorAbortions.domain(abortionsDomain);
+        $scope.colorCrime.domain(crimeDomain);
+
+
         //console.log($scope.currentCrimeYear);
 
         //callback();

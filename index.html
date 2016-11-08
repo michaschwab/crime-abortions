@@ -78,8 +78,8 @@
                 </svg>
             </div>
             <div class="col-md-6" style="position:relative">
-                <h2>{{currentCrimeType}} in {{currentCrimeYear}}</h2>
-                <div style="position:absolute; top: 21px; right: 50px">
+                <h2>{{currentCrimeView}} of {{currentCrimeType}} in {{currentCrimeYear}}</h2>
+                <div style="position:absolute; top: 61px; right: 50px">
                     <select name="crime-type" ng-model="currentCrimeType" ng-change="updateCrimeType()">
 
                         <option>Population</option>
@@ -103,12 +103,23 @@
                         <option>Motor vehicle theft rate</option>
 
                     </select>
+                    <select name="crime-view-selection" ng-model="currentCrimeView" ng-change="updatePlot()">
+                        <option>Number</option>
+                        <option>Absolute Change</option>
+                        <option>Relative Change</option>
+                    </select>
                 </div>
                 <svg id="crime-vis" width="800" height="500">
 
                 </svg>
             </div>
         </div>
+    </div>
+
+    <div class="container-fluid">
+
+        <h2>{{hoveredState}}</h2>
+
     </div>
 
 
