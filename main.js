@@ -120,8 +120,8 @@ angular.module('abortionsCrimeApp',[]).controller('abortionsCrimeController', fu
                             var absKey = 'Absolute Change in ' + crimeType;
                             var relKey = 'Relative Change in ' + crimeType;
 
-                            $scope.crimesByState[d.State][refYear][absKey] = Math.round(absChange);
-                            $scope.crimesByState[d.State][refYear][relKey] = relChange;
+                            $scope.crimesByState[d.State][d.Year][absKey] = Math.round(absChange);
+                            $scope.crimesByState[d.State][d.Year][relKey] = relChange;
                         }
 
                     }

@@ -120,6 +120,46 @@
 
         <h2>{{hoveredState}}</h2>
 
+        <div class="row">
+            <div class="col-md-2">
+                <h3>Abortions in {{currentYear}}</h3>
+                <dl>
+                    <dt>Number</dt>
+                    <dd>{{abortionsByState[hoveredState][currentYear]['Number']}}
+                        (vs. {{abortionsByState[hoveredState][abortionsByState[hoveredState][currentYear]['Reference Year']]['Number']}} in {{abortionsByState[hoveredState][currentYear]['Reference Year']}})</dd>
+
+                    <dt>Absolute Change</dt>
+                    <dd>{{abortionsByState[hoveredState][currentYear]['Absolute Change']>0?'+':''}}{{abortionsByState[hoveredState][currentYear]['Absolute Change']}} abortions</dd>
+
+                    <dt>Relative Change</dt>
+                    <dd>{{abortionsByState[hoveredState][currentYear]['Relative Change']>0?'+':''}}{{abortionsByState[hoveredState][currentYear]['Relative Change']}} %</dd>
+
+                    <dt></dt>
+                    <dd></dd>
+                </dl>
+            </div>
+            <div class="col-md-4"></div>
+            <div class="col-md-2">
+                <h3>{{currentCrimeType}} in {{currentYear}}</h3>
+                <dl>
+                    <dt>Number</dt>
+                    <dd>{{crimesByState[hoveredState][currentCrimeYear][currentCrimeType]}}
+                        </dd>
+
+                    <dt>Absolute Change</dt>
+                    <dd>{{crimesByState[hoveredState][currentCrimeYear]['Absolute Change in '+currentCrimeType]}}</dd>
+
+                    <dt>Relative Change</dt>
+                    <dd>{{crimesByState[hoveredState][currentCrimeYear]['Relative Change in '+currentCrimeType]}} %</dd>
+
+                    <dt></dt>
+                    <dd></dd>
+                </dl>
+
+            </div>
+            <div class="col-md-4"></div>
+        </div>
+
     </div>
 
 
