@@ -48,7 +48,7 @@ angular.module('abortionsCrimeApp',[]).controller('abortionsCrimeController', fu
         $scope.colorAbortionsDiverging = d3.scaleSequential(d3.interpolatePuOr);
             //.range(["darkred", "#f5f5f5", "steelblue"]);
         $scope.colorCrimeLinear = d3.scaleLinear()
-            .range(["#f5f5f5", "darkred"]);
+            .range(["darkred", "#f5f5f5"]);
         $scope.colorCrimeDiverging = d3.scaleSequential(d3.interpolateRdYlBu);
 
         var projection = d3.geoAlbersUsa()
@@ -182,7 +182,7 @@ angular.module('abortionsCrimeApp',[]).controller('abortionsCrimeController', fu
                     $scope.updateActive();
                 });
             })
-            .append("title")
+            /*.append("title")
             .text(function(d)
             {
                 var thisStatesAbortions = $scope.abortionsByState[d.properties.name];
@@ -213,7 +213,7 @@ angular.module('abortionsCrimeApp',[]).controller('abortionsCrimeController', fu
 
 
                 return label;
-            });
+            })*/;
 
         crimeVis.append("g")
             .attr("class", "states")
@@ -243,7 +243,7 @@ angular.module('abortionsCrimeApp',[]).controller('abortionsCrimeController', fu
                     $scope.updateActive();
                 });
             })
-            .append("title")
+            /*.append("title")
             .text(function(d)
             {
                 var label = d.properties.name;
@@ -262,7 +262,7 @@ angular.module('abortionsCrimeApp',[]).controller('abortionsCrimeController', fu
                 }
 
                 return label;
-            });
+            })*/;
     }
 
     function getClosestCrimeYear()
@@ -390,6 +390,7 @@ angular.module('abortionsCrimeApp',[]).controller('abortionsCrimeController', fu
 
         //console.log(abortionsDomain);
         //console.log(crimeDomain);
+        crimeDomain.reverse();
         $scope.colorAbortions.domain(abortionsDomain);
         $scope.colorCrime.domain(crimeDomain);
 
