@@ -10,6 +10,13 @@
     stroke: #ff0000;
 }
 
+.line {
+    fill: none;
+    stroke: steelblue;
+    stroke-width: 1.5px;
+}
+
+
 /*
 .header a, .header  a:link, .header  a:hover {
     color: #444;

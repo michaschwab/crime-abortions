@@ -121,6 +121,7 @@ angular.module('abortionsCrimeApp',[]).controller('abortionsCrimeController', fu
                             var absKey = 'Absolute Change in ' + crimeType;
                             var relKey = 'Relative Change in ' + crimeType;
 
+                            $scope.crimesByState[d.State][d.Year]['Year'] = d.Year;
                             $scope.crimesByState[d.State][d.Year]['Reference Year'] = refYear;
                             $scope.crimesByState[d.State][d.Year][absKey] = Math.round(absChange);
                             $scope.crimesByState[d.State][d.Year][relKey] = relChange;
@@ -160,9 +161,9 @@ angular.module('abortionsCrimeApp',[]).controller('abortionsCrimeController', fu
     var histogramSvg = null;
     var histogramG = null;
     var histogramIsSetup = false;
-    var histogramX = null;
+    var histogramX = null, histogramCrimeX;
     var histogramY = null, histogramCrimeY = null;
-    var histogramAxisG = null;
+    var histogramAxisG = null, histogramCrimesG;
     var histogramHeight, histogramWidth;
 
     function setupHistograms()
@@ -173,6 +174,7 @@ angular.module('abortionsCrimeApp',[]).controller('abortionsCrimeController', fu
         histogramHeight = +histogramSvg.attr("height") - margin.top - margin.bottom;
 
         histogramX = d3.scaleBand().rangeRound([0, histogramWidth]).padding(0.1);
+        histogramCrimeX = d3.scaleBand().rangeRound([0, histogramWidth]).padding(0.1);
         histogramY = d3.scaleLinear().rangeRound([histogramHeight, 0]);
         histogramCrimeY = d3.scaleLinear().rangeRound([histogramHeight, 0]);
 
@@ -180,6 +182,7 @@ angular.module('abortionsCrimeApp',[]).controller('abortionsCrimeController', fu
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
         histogramAxisG = histogramG.append('g');
+        histogramCrimesG = histogramG.append('g').attr('class', 'lines');
 
         histogramIsSetup = true;
     }
@@ -233,10 +236,13 @@ angular.module('abortionsCrimeApp',[]).controller('abortionsCrimeController', fu
         var crimeData = [];
         for(var year in hoveredCrimes)
         {
-            crimeData.push(hoveredCrimes[year]);
+            if(year - $scope.currentDelayYears >= 1973)
+                crimeData.push(hoveredCrimes[year]);
         }
-
+/*console.log(crimeData.map(function(d) { return d['Year']; }));*/
+        //histogramX.domain(abortionData.map(function(d) { return d['Year']; }));
         histogramX.domain(abortionData.map(function(d) { return d['Year']; }));
+        histogramCrimeX.domain(crimeData.map(function(d) { return d['Year']; }));
         histogramY.domain($scope.abortionExtrema);
         histogramCrimeY.domain($scope.crimeExtrema);
 
@@ -281,8 +287,11 @@ angular.module('abortionsCrimeApp',[]).controller('abortionsCrimeController', fu
 
         /******* lines *****/
         var line = d3.line()
-            .x(function(d) { return x(d.date); })
-            .y(function(d) { return y(d.close); });
+            .x(function(d) { /*console.log(d['Year'], histogramCrimeX(d['Year']));*/ return histogramCrimeX(d['Year']); })
+            .y(function(d) { return histogramCrimeY(d[$scope.getFullCurrentCrimeType()]); });
+
+        histogramCrimesG.selectAll('*').remove();
+        histogramCrimesG.append('path').attr('class', 'line').attr('d', line(crimeData))
     }
 
 
