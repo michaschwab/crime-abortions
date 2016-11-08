@@ -2,6 +2,14 @@
     stroke: #ff0000;
 }
 
+#histograms .bar rect {
+    fill: #666699;
+}
+
+#histograms .bar.currentYear rect {
+    stroke: #ff0000;
+}
+
 /*
 .header a, .header  a:link, .header  a:hover {
     color: #444;
